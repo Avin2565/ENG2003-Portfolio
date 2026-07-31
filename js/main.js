@@ -24,24 +24,24 @@
     });
   });
 
-  // Scroll reveal (progressive enhancement — sections are visible by default;
-  // JS opts them into a fade-in rather than CSS hiding them until JS runs)
-  const sections = document.querySelectorAll('main section:not(#hero)');
-  const revealObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('in-view');
-        revealObserver.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.05, rootMargin: '0px 0px -10% 0px' });
-  sections.forEach(s => {
-    s.classList.add('pre-reveal');
-    revealObserver.observe(s);
-  });
+  // Mobile sidebar drawer
+  const sidebar = document.getElementById('sidebar');
+  const scrim = document.getElementById('scrim');
+  const menuToggle = document.getElementById('menu-toggle');
+  function openDrawer() {
+    sidebar.classList.add('mobile-open');
+    scrim.classList.add('show');
+  }
+  function closeDrawer() {
+    sidebar.classList.remove('mobile-open');
+    scrim.classList.remove('show');
+  }
+  if (menuToggle) menuToggle.addEventListener('click', openDrawer);
+  if (scrim) scrim.addEventListener('click', closeDrawer);
+  document.querySelectorAll('.side-nav a').forEach(a => a.addEventListener('click', closeDrawer));
 
-  // Active nav link tracking
-  const navLinks = document.querySelectorAll('.floating-nav a[data-nav]');
+  // Active nav tracking
+  const navLinks = document.querySelectorAll('.side-nav a[data-nav]');
   const navMap = new Map();
   navLinks.forEach(link => {
     const id = link.getAttribute('href').slice(1);
@@ -57,35 +57,16 @@
         link.classList.add('active');
       }
     });
-  }, { rootMargin: '-40% 0px -50% 0px', threshold: 0 });
+  }, { rootMargin: '-35% 0px -55% 0px', threshold: 0 });
   navMap.forEach((_, el) => navObserver.observe(el));
 
-  // Modal handling
-  const modalTriggers = document.querySelectorAll('[data-modal]');
-  modalTriggers.forEach(card => {
-    card.addEventListener('click', () => {
-      const modal = document.getElementById(card.dataset.modal);
-      if (modal) {
-        modal.classList.add('open');
-        document.body.style.overflow = 'hidden';
-      }
+  // Showcase accordion
+  document.querySelectorAll('[data-trigger]').forEach(trigger => {
+    trigger.addEventListener('click', () => {
+      const row = trigger.closest('[data-row]');
+      const wasOpen = row.classList.contains('open');
+      row.parentElement.querySelectorAll('[data-row]').forEach(r => r.classList.remove('open'));
+      if (!wasOpen) row.classList.add('open');
     });
-  });
-  document.querySelectorAll('.modal-overlay').forEach(overlay => {
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) closeModal(overlay);
-    });
-    overlay.querySelectorAll('[data-close]').forEach(btn => {
-      btn.addEventListener('click', () => closeModal(overlay));
-    });
-  });
-  function closeModal(overlay) {
-    overlay.classList.remove('open');
-    document.body.style.overflow = '';
-  }
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      document.querySelectorAll('.modal-overlay.open').forEach(closeModal);
-    }
   });
 })();
